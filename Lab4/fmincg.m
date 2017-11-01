@@ -45,7 +45,9 @@ function [X, fX, i] = fmincg(f, X, options, P1, P2, P3, P4, P5)
 % [ml-class] Changes Made:
 % 1) Function name and argument specifications
 % 2) Output display
-%
+% 
+% [cyberwillis] Changes Made:
+% 1) Supress Output display by flag in options
 
 % Read options
 if exist('options', 'var') && ~isempty(options) && isfield(options, 'MaxIter')
@@ -69,7 +71,13 @@ end
 argstr = [argstr, ')'];
 
 if max(size(length)) == 2, red=length(2); length=length(1); else red=1; end
-S=['Iteration '];
+STRING_OUTPUT=['Iteration '];
+if exist('options', 'var') && ~isempty(options) && isfield(options, 'supress_output')
+    supress_output = options.supress_output;
+else 
+    supress_output = false;
+end
+
 
 i = 0;                                            % zero the run length counter
 ls_failed = 0;                             % no previous line search has failed
@@ -146,7 +154,9 @@ while i < abs(length)                                      % while not finished
 
   if success                                         % if line search succeeded
     f1 = f2; fX = [fX' f1]';
-    fprintf('%s %4i | Cost: %4.6e\r', S, i, f1);
+    if ~supress_output
+      fprintf('%s %4i | Cost: %4.6e\r', STRING_OUTPUT, i, f1);
+    end
     s = (df2'*df2-df1'*df2)/(df1'*df1)*s - df2;      % Polack-Ribiere direction
     tmp = df1; df1 = df2; df2 = tmp;                         % swap derivatives
     d2 = df1'*s;
@@ -172,4 +182,6 @@ while i < abs(length)                                      % while not finished
     fflush(stdout);
   end
 end
-fprintf('\n');
+if ~supress_output
+  fprintf('\n');
+end
